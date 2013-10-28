@@ -11,7 +11,7 @@ struct Node
     int datum;
     Node *left, *right;
     int count;
-   /* Node (int datum):datum(datum), left(0), right (0){}
+    /*Node (int datum):datum(datum), left(0), right (0){}
     ~Node()
     {
         datum=0;
@@ -23,12 +23,13 @@ struct Node
 class Set::SetImplementation
 {
     Node *root;
-    void copySetImpl(Node *&rootnew, Node *rootold);
+    void copySetImplementation(Node *&rootnew, Node *rootold);
     void deleteSetImplementation(Node *top);
 
     void unite(Node *top);
     void intersection(Node *top, SetImplementation &B,SetImplementation &C, SetImplementation &A);
     void intersection(Node *top,SetImplementation &C,Node *root);
+    void difference(Node *top, Set &C, Set &A);
 
     void push (Node *&top, int data);
     void display (Node *top);
@@ -47,9 +48,10 @@ public:
     int find (int key);
 
     SetImplementation unite(SetImplementation &A);
-    SetImplementation intersection(SetImplementation &A, SetImplementation &B);
+    SetImplementation intersection(SetImplementation &A);
+    SetImplementation difference (SetImplementation &A);
+
     SetImplementation &operator= (const SetImplementation &t);
-    //SetImplementation;
     bool nextDatum(bool start, int &datum) const;
 };
 
@@ -59,6 +61,22 @@ Set::Set():
     pimpl(0)
 {
     pimpl=new SetImplementation();
+}
+
+Set::Set(const Set &ob)
+{
+    pimpl=new SetImplementation();
+    if (ob.pimpl->root==0)
+        pimpl->root=0;
+    else
+    {
+        pimpl->root=new Node;
+        (pimpl->root)->datum=ob.(pimpl->root)->datum;
+        (pimpl->root)->count=1;
+        (pimpl->root)->left=0;
+        (pimpl->root)->right=0;
+        copySetImplementation(pimpl->root, ob.pimpl->root);
+    }
 }
 
 Set::~Set()
@@ -74,7 +92,7 @@ bool Set::isEmpty ()const
 
 void Set::push (int data)
 {
-   pimpl->push(data);
+    pimpl->push(data);
 };
 
 void Set::display()
@@ -87,14 +105,19 @@ int Set::find (int key)
     return pimpl->find(key);
 }
 
-Set Set::unite(Set A)
+Set Set::unite(const Set &A) const
 {
     return pimpl->unite(A);
 }
 
-Set Set::intersection(Set &A, Set &B)
+Set Set::intersection(const Set &A) const
 {
-    return pimpl->intersection(A,B);
+    return pimpl->intersection(A);
+}
+
+Set Set::difference (const Set &A) const
+{
+    return pimpl->difference(A);
 }
 
 Set &Set::operator= (const Set &t)
@@ -175,6 +198,7 @@ Set::SetImplementation::SetImplementation (const SetImplementation &ob)
         copySetImplementation(root, ob.root);
     }
 }
+
 void Set::SetImplementation::deleteSetImplementation(Node *top)
 {
     if (top->left!=0) deleteSetImplementation(top->left);
@@ -219,7 +243,7 @@ bool Set::SetImplementation::isEmpty() const
 
 SetImplementation Set::SetImplementation::unite(SetImplementation &A)
 {
-    SetImp0ementationl C;
+    SetImplementationl C;
     C.root=C.copyNode(root);
     C.unite(A.root);
     return C;
@@ -233,34 +257,37 @@ void Set::SetImplementation::unite(Node *top)
     unite(top->right);
     unite(top->left);
 }
-SetImplementation Set::SetImplementation::intersection(SetImplementation &A, SetImplementation &B)
+SetImplementation Set::SetImplementation::intersection(SetImplementation &A)
 {
     SetImplementation C;
-    intersection(root,C,B, A);
-    intersection(B.root,C,root);
+    intersection(root,C,A);
     return C;
-}
-
-void Set::SetImplementation::intersection(Node *top, SetImplementation &C, SetImplementation &B, SetImplementation &A)
-{
-    if (!top)
-        return;
-    intersection(top->right,C,B, A);
-    if (B.find(root,top->datum)==A.find(root,top->datum))
-        push(C.root, top->datum);
-    intersection(top->left,C, root);
-
 }
 
 void Set::SetImplementation::intersection(Node*top,SetImplementation &C,Node*root)
 {
-    if(top!=0)
-    {
-        intersection(top->left,C,root);
-        if(find(root,top->datum)!=0)
-            push(C.root,top->datum);
-        intersection(top->right,C,root);
-    }
+    if(!top)
+        return;
+    intersection(top->left,C,root);
+    push(C.root,top->datum);
+    intersection(top->right,C,root);
+}
+
+void Set::SetImplementation::difference(Node *top, Set &C, Set &A)
+{
+    if(!top)
+        return;
+    push(C.root, top->datum);
+    difference(top->left,A);
+    difference(top->right,A);
+
+}
+
+SetImplementation Set::SetImplementation::difference (SetImplementation &A)
+{
+    SetImplementation C;
+    difference(root, C,A);
+    return C;
 }
 
 SetImplementation& Set::SetImplementation::operator= (const SetImplementation &t)
@@ -287,7 +314,7 @@ bool Set::SetImplementation::nextDatum(bool start, int &datum) const
 {
     static Node *cur;
     if (start)
-    cur=root;
+        cur=root;
     bool result=cur!=0;
     if (result)
     {

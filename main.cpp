@@ -6,7 +6,7 @@ using namespace std;
 
 class ConsoleSet:public Set
 {
-    public:
+public:
     void output (ostream &out) const;
 };
 
@@ -20,9 +20,9 @@ void ConsoleSet::output(ostream &out) const
 {
     int datum;
     if (nextDatum(true, datum))
-    out<<datum<<" ";
+        out<<datum<<" ";
     while (nextDatum(false, datum))
-    out<<datum<<" ";
+        out<<datum<<" ";
 }
 
 int main()
@@ -46,7 +46,7 @@ int main()
         cout<<" 2 -> find. \n";
         cout<<" 3 -> unite. \n";
         cout<<" 4 -> intersection. \n";
-        cout<<" 5 -> display set. \n";
+        cout<<" 5 -> difference. \n";
         cout<<" 0 -> exit. \n";
         cout<<" action=";
         cin>>a;
@@ -130,46 +130,25 @@ int main()
             case 3:
             {
                 B.unite(A);
-                B.display();
-            }break;
+                output(B);
+            }
+            break;
             case 4:
             {
                 ConsoleSet C;
-               C.intersection(A,B);
+                C.intersection(A);
+                output(C);
             }
             case 5:
             {
-                cout<<"     1 -> display A:\n";
-                cout<<"     2 -> display B:\n";
-                cout<<"action=";
-                cin>>a3;
-                if (a1>0)
-                    switch(a3)
-                    {
-                    case 1:
-                    {
-                        if (A.isEmpty()) cout<<"Set A is empty.\n";
-                        else
-                        {
-                            cout<<" Set A \n";
-                            A.display();
-                        }
-                    }
-                    break;
-                    case 2:
-                    {
-                        if (B.isEmpty()) cout<<"Set B is empty.\n";
-                        else
-                        {
-                            cout<<" Set B \n";
-                            B.display();
-                        }
-                    }
-                    break;
-                    }
-            }break;
+                ConsoleSet C;
+                C.difference(A);
+                output(C);
+
+            }
+            break;
             case 0:
-            return 0;
+                return 0;
                 break;
             default:
                 cout<<"error: incorrect action \n";
